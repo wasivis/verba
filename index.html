@@ -1,0 +1,827 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Turn audio and video into transcripts with Verba, a private, offline-first transcription app for Windows.">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#fff8fb">
+    <link rel="canonical" href="https://wasivis.github.io/verba/">
+    <link rel="icon" href="assets/icon.ico" sizes="any">
+
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Verba">
+    <meta property="og:title" content="Verba — Your words, kept private">
+    <meta property="og:description" content="Transcribe audio and video on your Windows PC. Your media stays on your device.">
+    <meta property="og:url" content="https://wasivis.github.io/verba/">
+    <meta property="og:image" content="https://wasivis.github.io/verba/images/Verba.png">
+    <meta property="og:image:alt" content="Screenshot of the Verba transcription app">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Verba — Your words, kept private">
+    <meta name="twitter:description" content="A simple, offline-first transcription app for Windows.">
+    <meta name="twitter:image" content="https://wasivis.github.io/verba/images/Verba.png">
+
+    <title>Verba — Private audio and video transcription for Windows</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #30243d;
+        --muted: #766b81;
+        --purple: #674a86;
+        --purple-dark: #4b3269;
+        --pink: #ff9fc1;
+        --pink-soft: #ffe8f0;
+        --lavender: #eee8ff;
+        --paper: #fffafc;
+        --line: #eee3ec;
+        --white: #fff;
+        --shadow: 0 24px 70px rgb(75 50 105 / 12%);
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        background: var(--paper);
+        color: var(--ink);
+        font-family: "Segoe UI", Inter, ui-sans-serif, system-ui, sans-serif;
+        font-size: 16px;
+        line-height: 1.65;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      a {
+        color: inherit;
+      }
+
+      a:focus-visible {
+        outline: 3px solid var(--purple);
+        outline-offset: 4px;
+      }
+
+      .shell {
+        width: min(1120px, calc(100% - 48px));
+        margin-inline: auto;
+      }
+
+      .site-header {
+        display: flex;
+        min-height: 84px;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+      }
+
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 11px;
+        color: var(--purple-dark);
+        font-size: 1.25rem;
+        font-weight: 750;
+        letter-spacing: -0.04em;
+        text-decoration: none;
+      }
+
+      .brand img {
+        width: 34px;
+        height: 34px;
+        object-fit: contain;
+      }
+
+      .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 30px;
+        color: var(--muted);
+        font-size: 0.92rem;
+        font-weight: 600;
+      }
+
+      .nav-links a {
+        text-decoration: none;
+      }
+
+      .nav-links a:hover {
+        color: var(--purple);
+      }
+
+      .button {
+        display: inline-flex;
+        min-height: 50px;
+        align-items: center;
+        justify-content: center;
+        padding: 0 23px;
+        border: 0;
+        border-radius: 999px;
+        background: var(--pink);
+        box-shadow: 0 8px 20px rgb(255 159 193 / 25%);
+        color: #382743;
+        font-size: 0.95rem;
+        font-weight: 750;
+        text-align: center;
+        text-decoration: none;
+        transition: transform 160ms ease, box-shadow 160ms ease;
+      }
+
+      .button:hover {
+        box-shadow: 0 12px 26px rgb(255 159 193 / 36%);
+        transform: translateY(-2px);
+      }
+
+      .button-small {
+        min-height: 42px;
+        padding-inline: 18px;
+        font-size: 0.88rem;
+      }
+
+      .hero {
+        overflow: hidden;
+        padding: 74px 0 95px;
+        background:
+          radial-gradient(ellipse at 82% 15%, rgb(255 223 232 / 75%), transparent 34%),
+          radial-gradient(ellipse at 10% 70%, rgb(238 232 255 / 75%), transparent 38%),
+          var(--paper);
+      }
+
+      .hero-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+        align-items: center;
+        gap: 50px;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0 0 20px;
+        color: var(--purple);
+        font-size: 0.78rem;
+        font-weight: 800;
+        letter-spacing: 0.11em;
+        text-transform: uppercase;
+      }
+
+      .eyebrow::before {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--pink);
+        content: "";
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin-top: 0;
+      }
+
+      h1 {
+        max-width: 610px;
+        margin-bottom: 22px;
+        color: var(--purple-dark);
+        font-size: clamp(2.9rem, 6vw, 5rem);
+        font-weight: 760;
+        letter-spacing: -0.075em;
+        line-height: 1.02;
+      }
+
+      h1 span {
+        color: #bd638d;
+      }
+
+      .hero-copy {
+        max-width: 500px;
+        margin-bottom: 30px;
+        color: var(--muted);
+        font-size: 1.12rem;
+      }
+
+      .hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 16px;
+      }
+
+      .text-link {
+        color: var(--purple);
+        font-size: 0.92rem;
+        font-weight: 700;
+        text-decoration-thickness: 1px;
+        text-underline-offset: 4px;
+      }
+
+      .hero-note {
+        margin: 18px 0 0;
+        color: var(--muted);
+        font-size: 0.82rem;
+      }
+
+      .screenshot-wrap {
+        position: relative;
+        padding: 15px;
+        border: 1px solid rgb(255 255 255 / 80%);
+        border-radius: 25px;
+        background: rgb(255 255 255 / 62%);
+        box-shadow: var(--shadow);
+        transform: rotate(1.2deg);
+      }
+
+      .screenshot-image {
+        display: block;
+        width: 100%;
+        height: auto;
+        border-radius: 16px;
+      }
+
+      .screenshot-caption {
+        position: absolute;
+        right: 24px;
+        bottom: -13px;
+        left: 24px;
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.72rem;
+        text-align: center;
+      }
+
+      .trust-strip {
+        border-block: 1px solid var(--line);
+        background: #fff;
+      }
+
+      .trust-items {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        padding-block: 23px;
+        color: var(--purple-dark);
+        font-size: 0.88rem;
+        font-weight: 700;
+        text-align: center;
+      }
+
+      .trust-items span {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+      }
+
+      .trust-items span::before {
+        color: #bd638d;
+        content: "✦";
+      }
+
+      .section {
+        padding-block: 100px;
+      }
+
+      .section-heading {
+        max-width: 650px;
+        margin: 0 auto 48px;
+        text-align: center;
+      }
+
+      .section-heading .eyebrow {
+        justify-content: center;
+      }
+
+      h2 {
+        margin-bottom: 15px;
+        color: var(--purple-dark);
+        font-size: clamp(2rem, 4vw, 3.25rem);
+        font-weight: 740;
+        letter-spacing: -0.06em;
+        line-height: 1.1;
+      }
+
+      .section-heading > p:last-child {
+        margin-bottom: 0;
+        color: var(--muted);
+        font-size: 1.04rem;
+      }
+
+      .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 18px;
+      }
+
+      .feature-card {
+        min-height: 225px;
+        padding: 26px;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: #fff;
+      }
+
+      .feature-icon {
+        display: grid;
+        width: 44px;
+        height: 44px;
+        margin-bottom: 21px;
+        place-items: center;
+        border-radius: 13px;
+        background: var(--lavender);
+        color: var(--purple);
+        font-size: 1.2rem;
+        font-weight: 800;
+      }
+
+      .feature-card:nth-child(2) .feature-icon,
+      .feature-card:nth-child(5) .feature-icon {
+        background: var(--pink-soft);
+        color: #a74e76;
+      }
+
+      .feature-card h3 {
+        margin-bottom: 8px;
+        color: var(--purple-dark);
+        font-size: 1.08rem;
+        letter-spacing: -0.02em;
+      }
+
+      .feature-card p {
+        margin-bottom: 0;
+        color: var(--muted);
+        font-size: 0.92rem;
+      }
+
+      .privacy {
+        background: linear-gradient(135deg, #f3efff, #fff0f5);
+      }
+
+      .privacy-grid {
+        display: grid;
+        grid-template-columns: 0.9fr 1.1fr;
+        align-items: center;
+        gap: 70px;
+      }
+
+      .privacy h2 {
+        max-width: 480px;
+      }
+
+      .privacy-copy {
+        color: var(--muted);
+        font-size: 1.03rem;
+      }
+
+      .privacy-list {
+        display: grid;
+        gap: 14px;
+        margin: 26px 0 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .privacy-list li {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        color: var(--purple-dark);
+        font-size: 0.94rem;
+        font-weight: 650;
+      }
+
+      .privacy-list li::before {
+        display: grid;
+        width: 23px;
+        height: 23px;
+        flex: 0 0 23px;
+        place-items: center;
+        border-radius: 50%;
+        background: #fff;
+        color: #a74e76;
+        content: "✓";
+        font-size: 0.78rem;
+        font-weight: 800;
+      }
+
+      .privacy-card {
+        padding: 32px;
+        border: 1px solid rgb(255 255 255 / 90%);
+        border-radius: 22px;
+        background: rgb(255 255 255 / 78%);
+        box-shadow: 0 18px 50px rgb(75 50 105 / 8%);
+      }
+
+      .privacy-card-label {
+        display: inline-block;
+        margin-bottom: 22px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: #e9f7ed;
+        color: #397c55;
+        font-size: 0.73rem;
+        font-weight: 800;
+      }
+
+      .privacy-card blockquote {
+        margin: 0;
+        color: var(--purple-dark);
+        font-size: clamp(1.5rem, 3vw, 2.25rem);
+        font-weight: 680;
+        letter-spacing: -0.05em;
+        line-height: 1.2;
+      }
+
+      .privacy-card p {
+        margin: 18px 0 0;
+        color: var(--muted);
+        font-size: 0.88rem;
+      }
+
+      .steps {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 30px;
+      }
+
+      .step {
+        position: relative;
+        padding-top: 18px;
+      }
+
+      .step-number {
+        display: grid;
+        width: 42px;
+        height: 42px;
+        margin-bottom: 20px;
+        place-items: center;
+        border: 1px solid #e7daef;
+        border-radius: 50%;
+        background: #fff;
+        color: var(--purple);
+        font-size: 0.9rem;
+        font-weight: 800;
+      }
+
+      .step h3 {
+        margin-bottom: 9px;
+        color: var(--purple-dark);
+        font-size: 1.1rem;
+      }
+
+      .step p {
+        margin-bottom: 0;
+        color: var(--muted);
+        font-size: 0.93rem;
+      }
+
+      .cta {
+        padding-block: 82px;
+        background: var(--purple-dark);
+        color: #fff;
+        text-align: center;
+      }
+
+      .cta h2 {
+        max-width: 670px;
+        margin-inline: auto;
+        color: #fff;
+      }
+
+      .cta p {
+        max-width: 560px;
+        margin: 0 auto 27px;
+        color: #e0d6ea;
+      }
+
+      .cta .button {
+        color: #382743;
+      }
+
+      .cta-note {
+        margin-top: 15px;
+        color: #e0d6ea;
+        font-size: 0.79rem;
+      }
+
+      .site-footer {
+        display: flex;
+        min-height: 88px;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        color: var(--muted);
+        font-size: 0.82rem;
+      }
+
+      .footer-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+      }
+
+      .footer-links a {
+        text-decoration: none;
+      }
+
+      .footer-links a:hover {
+        color: var(--purple);
+      }
+
+      @media (max-width: 850px) {
+        .hero-grid,
+        .privacy-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .hero-grid {
+          gap: 46px;
+        }
+
+        .hero-copy {
+          max-width: 650px;
+        }
+
+        .screenshot-wrap {
+          width: min(100%, 600px);
+          margin-inline: auto;
+        }
+
+        .feature-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+
+        .privacy-grid {
+          gap: 35px;
+        }
+      }
+
+      @media (max-width: 600px) {
+        .shell {
+          width: min(100% - 32px, 1120px);
+        }
+
+        .site-header {
+          min-height: 72px;
+        }
+
+        .nav-links {
+          gap: 14px;
+          font-size: 0.82rem;
+        }
+
+        .nav-links .nav-about {
+          display: none;
+        }
+
+        .button-small {
+          min-height: 38px;
+          padding-inline: 14px;
+        }
+
+        .hero {
+          padding: 56px 0 70px;
+        }
+
+        h1 {
+          font-size: clamp(2.7rem, 13vw, 4rem);
+        }
+
+        .hero-copy {
+          font-size: 1rem;
+        }
+
+        .screenshot-wrap {
+          padding: 9px;
+          border-radius: 19px;
+        }
+
+        .trust-items {
+          grid-template-columns: 1fr;
+          gap: 10px;
+          padding-block: 18px;
+          text-align: left;
+        }
+
+        .trust-items span {
+          justify-content: flex-start;
+        }
+
+        .section {
+          padding-block: 72px;
+        }
+
+        .section-heading {
+          margin-bottom: 34px;
+        }
+
+        .feature-grid,
+        .steps {
+          grid-template-columns: 1fr;
+          gap: 13px;
+        }
+
+        .feature-card {
+          min-height: 0;
+          padding: 23px;
+        }
+
+        .privacy-card {
+          padding: 24px;
+        }
+
+        .cta {
+          padding-block: 66px;
+        }
+
+        .site-footer {
+          min-height: 100px;
+          align-items: flex-start;
+          flex-direction: column;
+          justify-content: center;
+          gap: 9px;
+          padding-block: 17px;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        html {
+          scroll-behavior: auto;
+        }
+
+        *,
+        *::before,
+        *::after {
+          transition-duration: 0.01ms !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="shell site-header">
+      <a class="brand" href="#" aria-label="Verba home">
+        <img src="images/logo.png" alt="">
+        <span>Verba</span>
+      </a>
+      <nav class="nav-links" aria-label="Main navigation">
+        <a class="nav-about" href="#features">Features</a>
+        <a class="nav-about" href="#privacy">Privacy</a>
+        <a class="button button-small" href="https://wasivis.gumroad.com/l/qyuppg">Get Verba</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="shell hero-grid">
+          <div>
+            <p class="eyebrow">Private transcription for Windows</p>
+            <h1>Your words.<br><span>Your device.</span></h1>
+            <p class="hero-copy">
+              Turn audio and video into useful transcripts, without sending your
+              recordings to the cloud. Verba keeps the work on your PC.
+            </p>
+            <div class="hero-actions">
+              <a class="button" href="https://wasivis.gumroad.com/l/qyuppg">Get Verba on Gumroad</a>
+            </div>
+            <p class="hero-note">For Windows · Offline after model setup · No account required</p>
+          </div>
+
+          <figure class="screenshot-wrap">
+            <img class="screenshot-image" src="images/Verba.png" alt="Screenshot of Verba's offline transcription app">
+          </figure>
+        </div>
+      </section>
+
+      <section class="trust-strip" aria-label="Verba highlights">
+        <div class="shell trust-items">
+          <span>Your media stays on your PC</span>
+          <span>Audio and video transcription</span>
+          <span>Export SRT, VTT, or TXT</span>
+        </div>
+      </section>
+
+      <section class="section" id="features">
+        <div class="shell">
+          <div class="section-heading">
+            <p class="eyebrow">Made for getting words out of the way</p>
+            <h2>Simple from recording to transcript.</h2>
+            <p>
+              A focused desktop app for turning interviews, meetings, lectures,
+              and other recordings into text you can use.
+            </p>
+          </div>
+          <div class="feature-grid">
+            <article class="feature-card">
+              <div class="feature-icon" aria-hidden="true">◎</div>
+              <h3>Private by design</h3>
+              <p>Audio and video are processed locally on your Windows computer, not uploaded to a transcription service.</p>
+            </article>
+            <article class="feature-card">
+              <div class="feature-icon" aria-hidden="true">♫</div>
+              <h3>Work with your media</h3>
+              <p>Add individual files or scan folders for supported audio and video formats.</p>
+            </article>
+            <article class="feature-card">
+              <div class="feature-icon" aria-hidden="true">▤</div>
+              <h3>Choose your format</h3>
+              <p>Save transcripts as SRT subtitles, VTT captions, or plain text.</p>
+            </article>
+            <article class="feature-card">
+              <div class="feature-icon" aria-hidden="true">↗</div>
+              <h3>Queue and carry on</h3>
+              <p>Run a batch sequentially, follow progress, and reuse the selected model across files.</p>
+            </article>
+            <article class="feature-card">
+              <div class="feature-icon" aria-hidden="true">✓</div>
+              <h3>Pick up where you left off</h3>
+              <p>Your queue and settings are saved. Failed items can be retried without re-running completed files.</p>
+            </article>
+            <article class="feature-card">
+              <div class="feature-icon" aria-hidden="true">↓</div>
+              <h3>You control model downloads</h3>
+              <p>Verba asks before downloading a model. After setup, cached models can be used offline.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section privacy" id="privacy">
+        <div class="shell privacy-grid">
+          <div>
+            <p class="eyebrow">Your recordings stay yours</p>
+            <h2>Private work, on your own computer.</h2>
+            <p class="privacy-copy">
+              Verba runs transcription locally. No account or media upload is
+              part of the workflow. The first model download needs internet
+              access and your approval; after it is cached, you can transcribe
+              offline.
+            </p>
+            <ul class="privacy-list">
+              <li>Media is not uploaded for transcription.</li>
+              <li>Choose whether to download a missing model.</li>
+              <li>Your transcripts are saved to a folder you choose.</li>
+            </ul>
+          </div>
+          <aside class="privacy-card">
+            <span class="privacy-card-label">LOCAL-FIRST</span>
+            <blockquote>“Your recordings don’t need to leave your desk to become text.”</blockquote>
+            <p>Built for a straightforward, private desktop workflow.</p>
+          </aside>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="shell">
+          <div class="section-heading">
+            <p class="eyebrow">Three steps, no fuss</p>
+            <h2>From file to finished transcript.</h2>
+          </div>
+          <div class="steps">
+            <article class="step">
+              <span class="step-number">01</span>
+              <h3>Add your files</h3>
+              <p>Select audio or video, or add a folder to find supported media inside it.</p>
+            </article>
+            <article class="step">
+              <span class="step-number">02</span>
+              <h3>Choose your settings</h3>
+              <p>Pick a model, language, transcript format, and optional output folder.</p>
+            </article>
+            <article class="step">
+              <span class="step-number">03</span>
+              <h3>Transcribe locally</h3>
+              <p>Follow the queue and save your finished transcript alongside the source or in your chosen folder.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="cta">
+        <div class="shell">
+          <p class="eyebrow">A clearer way to work with recordings</p>
+          <h2>Make your next recording searchable.</h2>
+          <p>
+            Keep the workflow simple and the files close. Get Verba for your
+            Windows PC.
+          </p>
+          <a class="button" href="https://wasivis.gumroad.com/l/qyuppg">Get Verba on Gumroad</a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="shell site-footer">
+      <span>© <span>Verba</span>. Audio and video stay on your device.</span>
+      <nav class="footer-links" aria-label="Footer navigation">
+        <a href="#features">Features</a>
+        <a href="#privacy">Privacy</a>
+        <a href="https://wasivis.gumroad.com/l/qyuppg">Get Verba</a>
+      </nav>
+    </footer>
+  </body>
+</html>
